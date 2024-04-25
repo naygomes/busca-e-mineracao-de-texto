@@ -1,5 +1,5 @@
+import re
 from xml.etree import ElementTree as ET
-from unidecode import unidecode
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from utils import read_config
@@ -17,7 +17,7 @@ def parse_record(record):
     else:
         abstract = abstract.text
 
-    abstract = unidecode(abstract.replace(';', '').upper())
+    abstract = re.sub(r'[^a-zA-Z\s]', ' ', abstract.replace('\n', ' ')).upper()
     return record_number, abstract
 
 def generate_inverted_list(config_path):

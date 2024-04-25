@@ -1,0 +1,1 @@
+O modelo vetorial foi representado em formato matricial e salvo como um arquivo csv, onde a coluna corresponde aos documentos e as linhas, ou índices, correspondem às palavras.
