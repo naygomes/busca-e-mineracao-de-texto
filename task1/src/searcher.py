@@ -1,11 +1,15 @@
 import re
 import math
+import logging
 from nltk.tokenize import word_tokenize
 from utils import read_config
 from indexer import calculate_tf, calculate_tf_idf
 
+logger = logging.getLogger(__name__)
 
 def generate_queries(consultas_path):
+    logger.info("Lendo os arquivos de dados")
+
     with open(consultas_path, 'r', encoding='utf-8') as file:
         queries = {}
         for i, line in enumerate(file):
@@ -14,6 +18,9 @@ def generate_queries(consultas_path):
     
             query_number, query_text = line.strip('\n').partition(';')[0], line.strip('\n').partition(';')[2]
             queries[query_number] = query_text
+    
+    logger.info("Arquivo de dados lido com sucesso")
+
     return queries
 
 def process_text(text):
@@ -74,13 +81,27 @@ def similarity(vector1, vector2):
         return 0
 
 def searcher(config_path):
+
+    logger.info("Lendo arquivo de configuração")
+
     config_file = read_config(config_path)
+
+    logger.info("Arquivo de configuração lido com sucesso")
+
     modelo_path = config_file['MODELO'][0]
     consultas_path = config_file['CONSULTAS'][0]
     resultados_path = config_file['RESULTADOS'][0]
 
+    logger.info("Gerando tf_idf das consultas")
+
     query_tf_idf = create_queries_tf_idf(consultas_path)
+    
+    logger.info("Tf_idf das consultas gerado com sucesso")
+
     model_tf_idf = {}
+
+    logger.info("Lendo arquivo de modelo")
+    logger.info("Gerando tf_idf do modelo")
 
     with open(modelo_path, 'r', encoding='utf-8') as file:
         for i, line in enumerate(file):
@@ -90,17 +111,30 @@ def searcher(config_path):
             words = line.partition(';')[2].replace('\n', '').split(";")
 
             model_tf_idf[doc] = eval(words[0])
+    logger.info("Arquivo de modelo lido com sucesso")
+    logger.info("Tf_idf do modelo gerado com sucesso")
 
     searches = {}
+    
+    logger.info("Calculando similaridade")
+
     for query in query_tf_idf:
         searches[query] = {}
         for doc in model_tf_idf:
             searches[query][doc] = similarity(query_tf_idf[query], model_tf_idf[doc])
     
+    logger.info("Similaridade calculada com sucesso")
+
+    logger.info("Gerando dicionário de buscas ordenado por similaridade")
+
     searches_list = {}
     for query, docs in searches.items():
         searches_list[query] = dict(sorted(docs.items(), key=lambda item: item[1], reverse=True))
     
+    logger.info("Dicionário de buscas gerado com sucesso")
+
+    logger.info("Gerando saída em um arquivo csv")
+
     with open(resultados_path, 'w', encoding='utf-8') as file:
         file.write('QueryId;ResultList\n')
         for query, docs in searches_list.items():
@@ -109,3 +143,5 @@ def searcher(config_path):
                 ordered_list = [{rank}, {doc_number}, {searches_list[query][doc_number]}]
                 file.write(f'{query};{ordered_list}\n')
                 rank += 1
+    
+    logger.info("Saída gerada com sucesso")
