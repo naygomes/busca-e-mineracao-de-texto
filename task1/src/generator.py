@@ -1,8 +1,11 @@
 import re
+import logging
 from xml.etree import ElementTree as ET
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from utils import read_config
+
+logger = logging.getLogger(__name__)
 
 def parse_record(record):
     record_number = record.find('RECORDNUM').text.replace(' ', '')
@@ -23,18 +26,33 @@ def parse_record(record):
 def generate_inverted_list(config_path):
     record_list = []
 
+    logger.info("Lendo arquivo de configuração")
+
     config_file = read_config(config_path)
+
+    logger.info("Arquivo de configuração lido com sucesso")
+
     leia_path = config_file['LEIA']
     escreva_path = config_file['ESCREVA'][0]
+
+    logger.info("Lendo os arquivos de dados")
 
     for file in leia_path:
         doc = ET.parse(file).getroot()
         for record in doc.findall('RECORD'):
             record_number, abstract = parse_record(record)
             record_list.append((record_number, abstract))
+    
+    logger.info("Arquivo de dados lido com sucesso")
+
+    logger.info("Gerando palavras de parada")
 
     stop_words = set(stopwords.words('english'))
     inverted_list = {}
+
+    logger.info("Palavras de parada geradas com sucesso")
+
+    logger.info("Gerando lista invertida")
 
     for record_number, abstract in record_list:
         word_tokens = word_tokenize(abstract)
@@ -43,8 +61,14 @@ def generate_inverted_list(config_path):
             if word not in inverted_list:
                 inverted_list[word] = []
             inverted_list[word].append(record_number)
+    
+    logger.info("Lista invertida gerada com sucesso")
+
+    logger.info("Gerando saída em um arquivo csv")
 
     with open(escreva_path, 'w', encoding='utf-8') as file:
         file.write('Word;DocumentsList\n')
         for word, documentsList in inverted_list.items():
             file.write(word + ';' + str(documentsList) + '\n')
+    
+    logger.info("Saída gerada com sucesso")

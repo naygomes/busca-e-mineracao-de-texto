@@ -1,7 +1,16 @@
 from processor import generate_consultas, generate_esperados
 from generator import generate_inverted_list
+from indexer import indexer
+from searcher import searcher
 
-# generate_consultas('config/PC.CFG')
-# generate_esperados('config/PC.CFG')
-# generate_inverted_list('config/GLI.CFG')
+
+processor_consultas = generate_consultas('config/PC.CFG')
+processor_esperados = generate_esperados('config/PC.CFG')
+
+generator_inverted_list = generate_inverted_list('config/GLI.CFG')
+
+indexer_tf_idf = indexer('config/INDEX.CFG')
+
+# searcher('config/BUSCA.CFG')
+
 
