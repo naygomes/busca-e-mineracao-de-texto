@@ -9,8 +9,7 @@ processor_esperados = generate_esperados('config/PC.CFG')
 
 generator_inverted_list = generate_inverted_list('config/GLI.CFG')
 
-indexer_tf_idf = indexer('config/INDEX.CFG')
+model_tf_idf = indexer('config/INDEX.CFG')
 
-# searcher('config/BUSCA.CFG')
-
+searcher_results = searcher('config/BUSCA.CFG')
 

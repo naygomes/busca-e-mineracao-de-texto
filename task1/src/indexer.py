@@ -18,12 +18,10 @@ def parse_dict(leia_path):
 
             if len(word) > 2:
                 inverted_list[word] = docs
-            
     return inverted_list
 
 def generate_tf(leia_path):
     inverted_list = parse_dict(leia_path)
-
     tf_dict = {}
 
     for word, docs in list(inverted_list.items()):
@@ -44,14 +42,12 @@ def calculate_tf(tf_dict):
     for doc, words in list(tf_dict.items()):
         for word, occurrences in list(words.items()):
             tf_result[doc][word] = occurrences/len(words)
-
     return tf_result
 
 def calculate_idf(leia_path):
     idf_dict = {}
     total_docs = len(generate_tf(leia_path))
     tf_dict = parse_dict(leia_path)
-
     for word, docs in list(tf_dict.items()):
         new_list = list(set(eval(docs[0])))
         number_docs_with_word = len(new_list)
