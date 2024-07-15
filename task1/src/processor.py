@@ -1,12 +1,19 @@
 import logging
 from unidecode import unidecode
 from xml.etree import ElementTree as ET
-from utils import read_config
+from utils import read_config, get_stemmer
+from nltk.stem import *
+
+stemmer = PorterStemmer()
 
 logger = logging.getLogger(__name__)
 
-def process_text(text):
+def process_text(text, use_stemmer):
     processed_text = unidecode(text.replace(';', '').upper()).replace('\n', '')
+
+    if use_stemmer:
+        processed_text = ' '.join([stemmer.stem(word) for word in processed_text.split()]).upper()
+
     processed_text = ' '.join(processed_text.split())
     return processed_text
 
@@ -27,6 +34,7 @@ def generate_consultas(config_path):
 
     leia_path = config_file['LEIA'][0]
     consultas_path = config_file['CONSULTAS'][0]
+    use_stemmer = get_stemmer(config_file)
 
     logger.info("Lendo arquivo de dados")
 
@@ -35,7 +43,7 @@ def generate_consultas(config_path):
             for query in doc.findall('QUERY'):
                 query_number = query.find('QueryNumber').text
                 query_text = query.find('QueryText').text
-                query_text_processed = process_text(query_text)
+                query_text_processed = process_text(query_text, use_stemmer)
                 query_list.append((query_number, query_text_processed))
     
     logger.info("Arquivo de dados lido com sucesso")

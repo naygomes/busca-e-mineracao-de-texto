@@ -2,7 +2,7 @@ import re
 import math
 import logging
 from nltk.tokenize import word_tokenize
-from utils import read_config
+from utils import read_config, get_stemmer
 from indexer import calculate_tf, calculate_tf_idf
 
 logger = logging.getLogger(__name__)
@@ -92,6 +92,10 @@ def searcher(config_path):
     consultas_path = config_file['CONSULTAS'][0]
     resultados_path = config_file['RESULTADOS'][0]
 
+    use_stemmer = get_stemmer(config_file)
+
+    resultados_path = resultados_path.rpartition('.')[0] + ('-stemmer.csv' if use_stemmer else '-nostemmer.csv')
+
     logger.info("Gerando tf_idf das consultas")
 
     query_tf_idf = create_queries_tf_idf(consultas_path)
@@ -140,7 +144,7 @@ def searcher(config_path):
         for query, docs in searches_list.items():
             rank = 1
             for doc_number in docs:
-                ordered_list = [{rank}, {doc_number}, {searches_list[query][doc_number]}]
+                ordered_list = [rank, doc_number, searches_list[query][doc_number]]
                 file.write(f'{query};{ordered_list}\n')
                 rank += 1
     

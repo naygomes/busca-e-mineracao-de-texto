@@ -3,11 +3,15 @@ import logging
 from xml.etree import ElementTree as ET
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from utils import read_config
+from nltk.stem import *
+
+from utils import read_config, get_stemmer
+
+stemmer = PorterStemmer()
 
 logger = logging.getLogger(__name__)
 
-def parse_record(record):
+def parse_record(record, use_stemmer):
     record_number = record.find('RECORDNUM').text.replace(' ', '')
     
     abstract = record.find('ABSTRACT')
@@ -20,7 +24,12 @@ def parse_record(record):
     else:
         abstract = abstract.text
 
+    if use_stemmer:
+        logger.info("Usando stemmer para a geração da lista invertida")
+        abstract = ' '.join([stemmer.stem(word) for word in abstract.split()])
+    
     abstract = re.sub(r'[^a-zA-Z\s]', ' ', abstract.replace('\n', ' ')).upper()
+
     return record_number, abstract
 
 def generate_inverted_list(config_path):
@@ -34,13 +43,14 @@ def generate_inverted_list(config_path):
 
     leia_path = config_file['LEIA']
     escreva_path = config_file['ESCREVA'][0]
-
+    use_stemmer = get_stemmer(config_file)
+       
     logger.info("Lendo os arquivos de dados")
 
     for file in leia_path:
         doc = ET.parse(file).getroot()
         for record in doc.findall('RECORD'):
-            record_number, abstract = parse_record(record)
+            record_number, abstract = parse_record(record, use_stemmer)
             record_list.append((record_number, abstract))
     
     logger.info("Arquivo de dados lido com sucesso")
