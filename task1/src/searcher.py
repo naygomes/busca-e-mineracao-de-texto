@@ -144,7 +144,7 @@ def searcher(config_path):
         for query, docs in searches_list.items():
             rank = 1
             for doc_number in docs:
-                ordered_list = [rank, doc_number, searches_list[query][doc_number]]
+                ordered_list = [rank, int(doc_number), searches_list[query][doc_number]]
                 file.write(f'{query};{ordered_list}\n')
                 rank += 1
     
